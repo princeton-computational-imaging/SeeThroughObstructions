@@ -1,0 +1,3 @@
+[submodule "pado"]
+	path = pado
+	url = https://github.com/shwbaek/pado.git

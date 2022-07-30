@@ -32,7 +32,7 @@ Optimzed DOE Designs are available under 'ckpts/' folder. Please refer to the su
 We include a sample script that demonstrates our entire image formation and reconstruction process. Please first download the pre-trained model from [here]() to 'ckpts/' folder, then you can run the 'inference.ipynb' notebook in Jupyter Notebook. The notebook will load the checkpoint and run the entire process. The simulated sensor capture, as well as reconstructed image will be displayed within the notebook.
 
 ## Training
-We include 'train.sh' for training purpose. Please refer to 'config/' for optics/sensor specs. 
+We include 'train.sh' for training purpose. Please refer to 'config/' for optics and sensor specs. 
 
 ## License
 Our code is licensed under BSL-1. By downloading the software, you agree to the terms of this License. 
