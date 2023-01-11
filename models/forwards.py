@@ -35,7 +35,10 @@ def compute_psf(wvl, depth, doe, args):
         wl, wr = compute_pad_size(param.img_res, psf_size[-1])
         hl, hr = compute_pad_size(param.img_res, psf_size[-2])  
         psf = psf[:,:,hl:-hr, wl:-wr]    
-
+    if depth <= param.depth_near_max:
+        cutoff = np.tan(np.sinh(wvl/(2*param.DOE_pitch)))*param.focal_length / param.equiv_camera_pitch 
+        DOE_mask = edge_mask(int(param.img_res / 2),cutoff, args.device)
+        psf *= DOE_mask  
     psf /= torch.sum(psf)
     return psf
 
@@ -70,7 +73,10 @@ def compute_psf_Fraunhofer(wvl, depth, doe, args):
         wl, wr = compute_pad_size(param.img_res, psf_size[-1])
         hl, hr = compute_pad_size(param.img_res, psf_size[-2])  
         psf = psf[:,:,hl:-hr, wl:-wr]  
-    
+    if depth <= param.depth_near_max:
+        cutoff = np.tan(np.sinh(wvl/(2*param.DOE_pitch)))*param.focal_length / param.equiv_camera_pitch 
+        DOE_mask = edge_mask(int(param.img_res / 2),cutoff, args.device)
+        psf *= DOE_mask     
     psf /= torch.sum(psf)
     return psf
 

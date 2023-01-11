@@ -20,7 +20,7 @@ doi = {10.1145/3528223.3530185}}
 ```
 
 ## Requirements
-This code is developed using Pytorch on Linux machine. Full frozen environment can be found in 'env.yml', note some of these libraries are not necessary to run this code. 
+This code is developed using Pytorch on Linux machine. Full frozen environment can be found in 'env.yml', note some of these libraries are not necessary to run this code. Other than the packages installed in the environment, our image formation model uses package [pado](https://github.com/shwbaek/pado) to simulate wave optics.   
 
 ## Data
 In the paper we use [Places365](http://places2.csail.mit.edu/index.html) and [Cityscapes](https://www.cityscapes-dataset.com/) as the obstruction-free background scene. And they can be easily swtich to any other datasets of your choice. See 'train.py' for more details on the data augmentation we applied. For more details on depth-aware obstruction simulation, please refer to 'models/'. 
