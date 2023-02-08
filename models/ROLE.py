@@ -92,7 +92,7 @@ def compute_raindrop(image_far, depth, args):
         update_alpha = drop.alphamap[drop_hl:drop_hr, drop_wl:drop_wr] > 0
         image_near[img_hl:img_hr, img_wl: img_wr] = texture_blend * update_alpha + image_near[img_hl:img_hr, img_wl: img_wr] * (1-update_alpha)
     
-    # image_near = torch.tensor(image_near *  (alpha_map > 0)).permute(2,0,1)[None,...]
-    image_near = torch.tensor(image_near).permute(2,0,1)[None,...]
+    image_near = torch.tensor(image_near *  (alpha_map > 0)).permute(2,0,1)[None,...]
+    # image_near = torch.tensor(image_near).permute(2,0,1)[None,...]
     mask = torch.tile(torch.tensor(1.0*(alpha_map > 0)).permute(2,0,1)[None,...],(1,3,1,1))
     return image_near.to(args.device), mask.to(args.device)

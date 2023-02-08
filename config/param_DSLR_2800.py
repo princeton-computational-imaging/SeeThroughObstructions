@@ -32,8 +32,8 @@ depth_near_min = 0.4
 depth_near_max = 0.8
 depth_far_min = 5
 depth_far_max = 10
-plot_depth = [0.4, 0.6, 0.8, 3, 5, 10]
+plot_depth = [10,8,5,0.8,0.6,0.4]
 
 # fence
-fence_min = 3e-3
-fence_max = 10e-3
+fence_min = 5e-3
+fence_max = 15e-3

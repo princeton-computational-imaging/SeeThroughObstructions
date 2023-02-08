@@ -35,7 +35,8 @@ def log(DOE_phase, G, batch_data, step,args):
     image_near, mask, image_DOE, image_near_DOE, image_far_DOE, psf_near, psf_far, mask_doe, height_map = image_formation(image_far,DOE_phase, args.compute_obstruction, args)
     image = image_near * mask + image_far * (1 - mask)
     
-    image_recon = torch.clamp(G(image_DOE, psf_near, psf_far), min=0, max=1)
+    image_recon = G(image_DOE, psf_near, psf_far)
+    image_recon = torch.clamp(image_recon, min=0, max=1)
     G_l1_loss = args.l1_loss_weight * args.l1_criterion(image_recon, image_far)
     G_perc_loss = torch.mean(args.perceptual_loss_weight * args.perceptual_criterion(2 * image_recon - 1, 2 * image_far - 1))
     G_masked_loss = args.masked_loss_weight * args.l1_criterion(image_recon*mask, image_far*mask)
@@ -65,7 +66,6 @@ def train_step(batch_data, DOE_phase, optics_optimizer, G, G_optimizer, step, ar
     image_far, _ = batch_data
     image_far = image_far.to(args.device)
     image_near, mask, image_DOE, image_near_DOE, image_far_DOE, psf_near, psf_far, mask_doe, height_map = image_formation(image_far,DOE_phase, args.compute_obstruction, args)
-    
     image_recon = G(image_DOE, psf_near, psf_far)
     G_l1_loss = args.l1_loss_weight * args.l1_criterion(image_recon, image_far)
     G_perc_loss = torch.mean(args.perceptual_loss_weight * args.perceptual_criterion(2 * image_recon - 1, 2 * image_far - 1))
@@ -148,6 +148,7 @@ def train(args):
     if args.pretrained_G is not None:
         G.load_state_dict(torch.load(args.G_init_ckpt, map_location='cpu'))
         G.to(args.device)
+
     G_optimizer = optim.Adam(params=G.parameters(), lr=args.G_lr)
 
     for _, batch_data in enumerate(testloader):
@@ -155,9 +156,9 @@ def train(args):
         break
 
     total_step = 0
+    train_loss = 0
     log(DOE_phase, G, test_data, total_step, args)
     for epoch_cnt in trange(args.n_epochs, desc="Epoch"):
-        train_loss = 0
         for _, batch_data in enumerate(trainloader):
             step_loss = train_step(batch_data, DOE_phase, optics_optimizer, G, G_optimizer, total_step, args)
             total_step += 1
@@ -195,7 +196,7 @@ def main():
 
     parser.add_argument('--obstruction', default = 'dirt_raindrop', type = str, help = 'obsturction type')
     parser.add_argument('--sensor_noise', default = 0.008, type=float, help='sensor noise level')
-    parser.add_argument('--n_epochs', default = 100, type = int, help = 'max num of training epoch')
+    parser.add_argument('--n_epochs', default = 40, type = int, help = 'max num of training epoch')
     parser.add_argument('--optics_lr', default=0.1, type=float, help='optical element learning rate')
     parser.add_argument('--G_lr', default=1e-4, type=float, help='network learning rate')
 
@@ -214,11 +215,14 @@ def main():
     param = convert_resolution(param,args)
 
     if args.pretrained_DOE is not None:
-        args.DOE_phase_init_ckpt = last_save(args.pretrained_DOE, 'DOE_phase_*')
+        if args.pretrained_DOE.endswith('.pt'):
+            args.DOE_phase_init_ckpt = args.pretrained_DOE
+        else:
+            args.DOE_phase_init_ckpt = last_save(args.pretrained_DOE, 'DOE_phase_*')
         param.DOE_phase_init = torch.load(args.DOE_phase_init_ckpt, map_location='cpu').detach()
 
     if args.pretrained_G is not None:
-        args.G_init_ckpt = last_save(args.pretrained_DOE, 'G_*')
+        args.G_init_ckpt = last_save(args.pretrained_G, 'G_*')
             
     save_settings(args, param)
     train(args)

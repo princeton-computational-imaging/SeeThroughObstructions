@@ -35,13 +35,13 @@ depth_near_min = 0.05
 depth_near_max = 0.12
 depth_far_min = 5
 depth_far_max = 10
-plot_depth = [0.05, 0.1, 0.2, 1, 3, 5]
+plot_depth = [5,3,1,0.12,0.08,0.05]
 
 # raindrop
-drop_Nmin = 30
-drop_Nmax = 60
+drop_Nmin = 5
+drop_Nmax = 8
 drop_Rmin = 1e-3
-drop_Rmax = 2e-3
+drop_Rmax = 3e-3
 
 # dirt
 perlin_res = 8

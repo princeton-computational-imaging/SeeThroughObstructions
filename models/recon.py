@@ -52,16 +52,18 @@ class Arch(nn.Module):
                 nn.Tanh()
                 )
 
-        self.res0 = BasicBlock(3 * 2, 3 * 2, 5, 1, 2).to(args.device)
-        self.res1 = BasicBlock(3 * 2, 3 * 2, 5, 1, 2).to(args.device)
-        self.res2 = BasicBlock(3 * 2, 3 * 2, 5, 1, 2).to(args.device)
+        # init to identity mapping
+        self.res0 = BasicBlock(3, 3, 3, 1, 1).to(args.device)
+        self.res1 = BasicBlock(3, 3, 3, 1, 1).to(args.device)
+        self.res2 = BasicBlock(3, 3, 3, 1, 1).to(args.device)
 
-        self.out0 = ConvBlock(3 * 2, 3, 5,1,2)
-        self.out1 = nn.Sequential(
+        self.out = nn.Sequential(
                 nn.ReflectionPad2d(2),
                 nn.Conv2d(3, 3, kernel_size=5, stride=1),
-                nn.Tanh()
+                nn.ReLU()
                 )
+        self.out.apply(init_id_weights)
+        
 
     def forward(self, image, psf_near, psf_far):
         psf0 = torch.tile(psf_far, (1,int(self.nf/3),1,1))
@@ -116,13 +118,11 @@ class Arch(nn.Module):
         up0 = self.up0_1(up0)
         up0 = up0 + image
 
-        res = self.res0(torch.cat([up0,image], 1))
+        res = self.res0(up0)
         res = self.res1(res)
         res = self.res2(res)
 
-        out = self.out0(res)
-        out = self.out1(out)
-        out = (out + 1) / 2
+        out = self.out(res)
 
         return out
     
@@ -150,17 +150,32 @@ def Wiener_deconv(image, psf):
     image_deconv = ifft(wiener * fft(real2complex(image))).get_mag()
     return torch.clamp(image_deconv.type_as(image), min = 0, max = 1)
 
+def init_zero_weights(module):
+    if isinstance(module, torch.nn.Conv2d):
+        # module.weight.data.zero_()
+        module.weight.data = torch.nn.init.xavier_uniform_(module.weight.data,gain=1e-3)
+        if module.bias is not None:
+            module.bias.data.zero_()
+
+def init_id_weights(module):
+    if isinstance(module, nn.Conv2d):
+        module.weight.data = torch.nn.init.dirac_(module.weight.data)
+        if module.bias is not None:
+            module.bias.data.zero_()
+            
 class BasicBlock(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, padding):
         super().__init__()
         self.conv1 = ConvBlock(in_channels, out_channels, kernel_size, stride, padding)
+        self.conv1.apply(init_zero_weights)
         self.conv2 = nn.Sequential(
             nn.ReflectionPad2d(padding),
-            nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride), #padding=padding),
+            nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride),
             nn.InstanceNorm2d(out_channels),
             )
+        self.conv2.apply(init_zero_weights)
         self.leakyrelu = nn.LeakyReLU()
-
+        
     def forward(self, x):
         identity = x
 
@@ -170,3 +185,5 @@ class BasicBlock(nn.Module):
         out = self.leakyrelu(out)
 
         return out
+
+
