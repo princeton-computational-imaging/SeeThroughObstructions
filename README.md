@@ -26,10 +26,10 @@ This code is developed using Pytorch on Linux machine. Full frozen environment c
 In the paper we use [Places365](http://places2.csail.mit.edu/index.html) and [Cityscapes](https://www.cityscapes-dataset.com/) as the obstruction-free background scene. And they can be easily swtich to any other datasets of your choice. See 'train.py' for more details on the data augmentation we applied. For more details on depth-aware obstruction simulation, please refer to 'models/'. 
 
 ## Pre-trained Models and Optimized DOE Designs
-Optimzed DOE Designs are available under 'ckpts/' folder. Please refer to the supplemental documents for fabrication details.
+Optimzed DOE Designs and pre-trained models are available under 'ckpts/' folder. Please refer to the supplemental documents for fabrication details.
 
 ## Sensor Capture Simulation and Reconstruction
-We include a sample script that demonstrates our entire image formation and reconstruction process. Please first download the pre-trained model from [here]() to 'ckpts/' folder, then you can run the 'inference.ipynb' notebook in Jupyter Notebook. The notebook will load the checkpoint and run the entire process. The simulated sensor capture, as well as reconstructed image will be displayed within the notebook.
+We include a sample script that demonstrates our entire image formation and reconstruction process. You can run the 'inference.ipynb' notebook in Jupyter Notebook. The notebook will load the checkpoint and run the entire process. The simulated depth-dependent PSFs, simulated sensor capture, as well as reconstructed image will be displayed within the notebook.
 
 ## Training
 We include 'train.sh' for training purpose. Please refer to 'config/' for optics and sensor specs. 
